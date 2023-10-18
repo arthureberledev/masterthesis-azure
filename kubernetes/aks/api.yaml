@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mt-aks-api
+spec:
+  replicas: 1 # Recherchieren worum es sich hierbei handelt
+  selector:
+    matchLabels:
+      app: mt-aks-api
+  template:
+    metadata:
+      labels:
+        app: mt-aks-api
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+        - name: mt-aks-api
+          image: arthureberle/masterthesis-express-ts-api:latest
+          env:
+            - name: DB_HOST
+              value: "masterthesis-sqlserver.mysql.database.azure.com"
+            - name: DB_USER
+              value: "masterthesis"
+            - name: DB_NAME
+              value: "masterthesis-mysqldb"
+            - name: DB_PASS
+              value: "secretpassword"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+          ports:
+            - containerPort: 3000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mt-aks-api
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 3000
+  selector:
+    app: mt-aks-api

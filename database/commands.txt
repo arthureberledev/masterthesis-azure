@@ -1,0 +1,22 @@
+# Tutorial 
+https://learn.microsoft.com/en-us/azure/mysql/flexible-server/quickstart-create-bicep
+
+# Create Resource Group
+az group create --name "mt-mysql-rg" --location germanywestcentral
+
+# Database Deployment
+az deployment group create --resource-group "mt-mysql-rg" --template-file "main.bicep" 
+
+az deployment group create --resource-group "mt-mysql-rg" --template-file "main.bicep" --parameters resourceNamePrefix="mt-db" administratorLogin="masterthesis" administratorLoginPassword="secretpassword" 
+
+
+az mysql flexible-server connect -n "mt-sqlserver" -u "mt-user" -p "secretpassword" -d "mt-mysqldb"
+
+CREATE TABLE users (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(255),
+  email VARCHAR(255) NOT NULL
+);
+
+# Cleanup
+az group delete --name "mt-mysql-rg" --yes
