@@ -1,14 +1,23 @@
 import { Router } from "express";
+import mysql from "mysql2";
 
-import { getDbPool } from "../services/db";
+const pool = mysql
+  .createPool({
+    host: "localhost",
+    user: "root",
+    database: "mt_mysql_db",
+    password: "secretpassword",
+    connectionLimit: 100,
+  })
+  .promise();
 
 const router = Router();
-const db = getDbPool();
 
 // insert 1000 users
 router.post("/", async (_req, res) => {
+  const connection = await pool.getConnection();
   try {
-    await db.query(`INSERT INTO users (name, email) VALUES
+    await connection.query(`INSERT INTO users (name, email) VALUES
 ('User', 'user@example.com'),
 ('User', 'user@example.com'),
 ('User', 'user@example.com'),
@@ -1015,6 +1024,8 @@ router.post("/", async (_req, res) => {
     res.status(500).json({
       message: error instanceof Error ? error.message : "Internal Server Error",
     });
+  } finally {
+    connection.release();
   }
 });
 

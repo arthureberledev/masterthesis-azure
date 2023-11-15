@@ -19,4 +19,4 @@ ENV ADDRESS=0.0.0.0 PORT=3000
 RUN npm run build
 
 # Command to run the application
-CMD ["npm", "run", "serve"]
+CMD ["npm", "run", "start"]

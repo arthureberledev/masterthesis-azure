@@ -46,25 +46,25 @@ param networkSecurityGroupName string = 'SecGroupNet'
   'Standard'
   'TrustedLaunch'
 ])
-param securityType string = 'TrustedLaunch'
+param securityType string = 'Standard'
 
 var imageReference = {
   'Ubuntu-1804': {
     publisher: 'Canonical'
     offer: 'UbuntuServer'
-    sku: '18_04-lts-gen2'
+    sku: '18_04-lts'
     version: 'latest'
   }
   'Ubuntu-2004': {
     publisher: 'Canonical'
     offer: '0001-com-ubuntu-server-focal'
-    sku: '20_04-lts-gen2'
+    sku: '20_04-lts'
     version: 'latest'
   }
   'Ubuntu-2204': {
     publisher: 'Canonical'
     offer: '0001-com-ubuntu-server-jammy'
-    sku: '22_04-lts-gen2'
+    sku: '22_04-lts'
     version: 'latest'
   }
 }

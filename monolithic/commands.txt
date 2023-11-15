@@ -1,3 +1,11 @@
-az group create --name "mt-monolithic-rg" --location germanywestcentral
+# Create Resource Group
+az group create --name mt-monolithic-rg --location germanywestcentral
 
-az deployment group create --resource-group "mt-monolithic-rg" --template-file "main.bicep" 
+# VM Deployment
+az deployment group create --resource-group mt-monolithic-rg --template-file main.bicep 
+
+# Review deployed resources
+az resource list --resource-group mt-monolithic-rg
+
+# Clean up
+az group delete --name mt-monolithic-rg --yes

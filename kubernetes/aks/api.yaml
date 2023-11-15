@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: mt-aks-api
 spec:
-  replicas: 1 # Recherchieren worum es sich hierbei handelt
+  replicas: 2
   selector:
     matchLabels:
       app: mt-aks-api
@@ -16,23 +16,14 @@ spec:
         "kubernetes.io/os": linux
       containers:
         - name: mt-aks-api
-          image: arthureberle/masterthesis-express-ts-api:latest
-          env:
-            - name: DB_HOST
-              value: "masterthesis-sqlserver.mysql.database.azure.com"
-            - name: DB_USER
-              value: "masterthesis"
-            - name: DB_NAME
-              value: "masterthesis-mysqldb"
-            - name: DB_PASS
-              value: "secretpassword"
+          image: arthureberle/mt-aks-api:latest
           resources:
             requests:
-              cpu: 100m
-              memory: 128Mi
+              cpu: 500m
+              memory: 3Gi
             limits:
-              cpu: 250m
-              memory: 256Mi
+              cpu: 1
+              memory: 4Gi
           ports:
             - containerPort: 3000
 ---

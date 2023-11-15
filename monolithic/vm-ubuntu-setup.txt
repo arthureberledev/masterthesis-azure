@@ -1,0 +1,72 @@
+# Update the image with the latest packages and security updates:
+
+sudo apt update && sudo apt upgrade
+
+# Install MySQL server:
+
+sudo apt install mysql-server
+
+# Start the MySQL server:
+
+sudo systemctl start mysql
+
+# Activate the MySQL server to start at boot time:
+
+sudo systemctl enable mysql
+
+# Change password:
+
+sudo mysql_secure_installation
+
+Securing the MySQL server deployment.
+
+Connecting to MySQL using a blank password.
+
+VALIDATE PASSWORD COMPONENT can be used to test passwords
+and improve security. It checks the strength of password
+and allows the users to set only those passwords which are
+secure enough. Would you like to setup VALIDATE PASSWORD component?
+
+# Connect to the MySQL server:
+
+mysql -u root -p
+
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'secretpassword';
+
+CREATE DATABASE IF NOT EXISTS mt_mysql_db;
+
+USE mt_mysql_db;
+
+CREATE TABLE users (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255), email VARCHAR(255) NOT NULL);
+
+# Set up the api
+
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash
+
+source ~/.nvm/nvm.sh
+
+nvm install v18.18.0
+
+sudo apt install git
+
+git clone https://github.com/arthureberledev/masterthesis-azure-monolithic-api
+
+cd masterthesis-azure-monolithic-api
+
+mkdir cert
+
+openssl req -x509 -newkey rsa:4096 -keyout cert/key.pem -out cert/cert.pem -days 365
+
+# Continue manually
+
+vi .env
+-> Insert mode (i)
+DB_HOST=localhost
+DB_USER=root
+DB_NAME=mt_mysql_db
+DB_PASS=secretpassword
+-> ESC -> :wq
+
+npm install
+npm run build
+npm run start

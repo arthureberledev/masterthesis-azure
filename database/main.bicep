@@ -14,14 +14,9 @@ param administratorLoginPassword string
 @description('Provide an array of firewall rules to be applied to the MySQL server.')
 param firewallRules array = [
   {
-    name: 'rule1'
-    startIPAddress: '192.168.0.1'
-    endIPAddress: '192.168.0.255'
-  }
-  {
-    name: 'rule2'
-    startIPAddress: '192.168.1.1'
-    endIPAddress: '192.168.1.255'
+    name: 'AllowAll'
+    startIPAddress: '0.0.0.0'
+    endIPAddress: '255.255.255.255'
   }
 ]
 
@@ -63,7 +58,7 @@ param storageIops int = 360
 param storageAutogrow string = 'Enabled'
 
 @description('The name of the sku, e.g. Standard_D32ds_v4.')
-param skuName string = 'Standard_D2_v3'
+param skuName string = 'Standard_D2ds_v4'
 
 param backupRetentionDays int = 7
 @allowed([
