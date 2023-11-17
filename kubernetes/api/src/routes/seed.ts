@@ -3,9 +3,9 @@ import mysql from "mysql2";
 
 const pool = mysql
   .createPool({
-    host: "localhost",
-    user: "root",
-    database: "mt_mysql_db",
+    host: "mt-db-server.mysql.database.azure.com",
+    user: "mt_user",
+    database: "mt_db",
     password: "secretpassword",
     connectionLimit: 100,
   })

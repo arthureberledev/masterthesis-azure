@@ -43,12 +43,10 @@ az aks get-credentials `
 
 ## Integrate container into cluster
 
-`kubectl apply -f api.yaml`
-
-`kubectl get service mt-aks-api`
-
-`kubectl delete deployment mt-aks-api`
-`kubectl delete service mt-aks-api`
+kubectl apply -f api.yaml
+kubectl get service mt-aks-api
+kubectl delete deployment mt-aks-api
+kubectl delete service mt-aks-api
 
 → EXTERNAL-IP
 

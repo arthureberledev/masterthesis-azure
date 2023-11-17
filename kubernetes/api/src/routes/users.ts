@@ -1,19 +1,20 @@
 import { Router } from "express";
-import type { ResultSetHeader, RowDataPacket } from "mysql2/promise";
 import mysql from "mysql2";
+
+import type { ResultSetHeader, RowDataPacket } from "mysql2/promise";
 
 const router = Router();
 const pool = mysql
   .createPool({
-    host: "localhost",
-    user: "root",
-    database: "mt_mysql_db",
+    host: "mt-db-server.mysql.database.azure.com",
+    user: "mt_user",
+    database: "mt_db",
     password: "secretpassword",
     connectionLimit: 100,
   })
   .promise();
 
-router.get("/", async (_request, response) => {
+router.get("/", async (request, response) => {
   const connection = await pool.getConnection();
   try {
     const [rows] = await connection.query("SELECT * FROM users");
@@ -30,9 +31,9 @@ router.get("/", async (_request, response) => {
 router.get("/:id", async (request, response) => {
   const connection = await pool.getConnection();
   try {
-    const id = request.params.id;
+    const { id } = request.params;
     if (!id) {
-      return response.status(400).json({ message: "Bad Request" });
+      return response.status(400).send("Bad Request");
     }
 
     const [rows] = (await connection.query("SELECT * FROM users WHERE id = ?", [
@@ -41,14 +42,12 @@ router.get("/:id", async (request, response) => {
 
     const user = rows[0];
     if (!user) {
-      return response.status(404).json({ message: "Not Found" });
+      return response.status(404).send("Not Found");
     }
-    response.status(200).json(user);
+    return response.status(200).json(user);
   } catch (error) {
     console.log(error);
-    response.status(500).json({
-      message: error instanceof Error ? error.message : "Internal Server Error",
-    });
+    return response.status(500).send(error.message);
   } finally {
     connection.release();
   }
@@ -57,11 +56,9 @@ router.get("/:id", async (request, response) => {
 router.post("/", async (request, response) => {
   const connection = await pool.getConnection();
   try {
-    const body = request.body;
-    const name = body.name;
-    const email = body.email;
+    const { name, email } = request.body;
     if (!name || !email) {
-      return response.status(400).json({ message: "Bad Request" });
+      return response.status(400).send("Bad Request");
     }
 
     const [results] = (await connection.query(
@@ -69,12 +66,10 @@ router.post("/", async (request, response) => {
       [name, email]
     )) as ResultSetHeader[];
 
-    response.status(201).json({ id: results.insertId, ...request.body });
+    return response.status(201).json({ id: results.insertId, ...request.body });
   } catch (error) {
     console.log(error);
-    response.status(500).json({
-      message: error instanceof Error ? error.message : "Internal Server Error",
-    });
+    return response.status(500).send(error.message);
   } finally {
     connection.release();
   }
@@ -83,27 +78,26 @@ router.post("/", async (request, response) => {
 router.patch("/:id", async (request, response) => {
   const connection = await pool.getConnection();
   try {
-    const id = request.params.id;
-    const body = request.body;
-    const email = body.email;
-    if (!id || !email) {
-      return response.status(400).json({ message: "Bad Request" });
+    const { name } = request.body;
+    const { id } = request.params;
+    if (!id || !name) {
+      return response.status(400).send("Bad Request");
     }
 
     const [results] = (await connection.query(
-      "UPDATE users SET email = ? WHERE id = ?",
-      [email, id]
+      "UPDATE users SET name = ? WHERE id = ?",
+      [name, id]
     )) as ResultSetHeader[];
-
     if (results.affectedRows === 0) {
-      return response.status(404).json({ message: "Not Found" });
+      return response.status(404).send("Not Found");
     }
-    response.status(200).json({ id: request.params.id, ...request.body });
+
+    return response
+      .status(200)
+      .json({ id: request.params.id, ...request.body });
   } catch (error) {
     console.log(error);
-    response.status(500).json({
-      message: error instanceof Error ? error.message : "Internal Server Error",
-    });
+    return response.status(500).send(error.message);
   } finally {
     connection.release();
   }
@@ -112,19 +106,23 @@ router.patch("/:id", async (request, response) => {
 router.delete("/:id", async (request, response) => {
   const connection = await pool.getConnection();
   try {
-    const id = request.params.id;
+    const { id } = request.params;
     if (!id) {
-      return response.status(400).json({ message: "Bad Request" });
+      return response.status(400).send("Bad Request");
     }
 
-    await pool.query("DELETE FROM users WHERE id = ?", [id]);
+    const [results] = (await connection.query(
+      "DELETE FROM users WHERE id = ?",
+      [id]
+    )) as ResultSetHeader[];
+    if (results.affectedRows === 0) {
+      return response.status(404).send("Not Found");
+    }
 
-    response.status(204).send();
+    return response.status(204).send();
   } catch (error) {
     console.log(error);
-    response.status(500).json({
-      message: error instanceof Error ? error.message : "Internal Server Error",
-    });
+    return response.status(500).send(error.message);
   } finally {
     connection.release();
   }

@@ -8,9 +8,9 @@ import * as mysql from "mysql2";
 
 const pool = mysql
   .createPool({
-    host: "mt-sqlserver.mysql.database.azure.com",
-    user: "masterthesis",
-    database: "flexibleserverdb",
+    host: "mt-db-server.mysql.database.azure.com",
+    user: "mt_user",
+    database: "mt_db",
     password: "secretpassword",
     connectionLimit: 100,
   })

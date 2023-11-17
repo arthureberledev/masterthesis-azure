@@ -6,12 +6,13 @@ import {
 } from "@azure/functions";
 
 import * as mysql from "mysql2";
+import type { ResultSetHeader } from "mysql2";
 
 const pool = mysql
   .createPool({
-    host: "mt-sqlserver.mysql.database.azure.com",
-    user: "masterthesis",
-    database: "flexibleserverdb",
+    host: "mt-db-server.mysql.database.azure.com",
+    user: "mt_user",
+    database: "mt_db",
     password: "secretpassword",
     connectionLimit: 100,
   })
@@ -32,21 +33,26 @@ export async function handler(
       };
     }
 
-    await connection.query("DELETE FROM users WHERE id = ?", [id]);
+    const [results] = (await connection.query(
+      "DELETE FROM users WHERE id = ?",
+      [id]
+    )) as ResultSetHeader[];
+    if (results.affectedRows === 0) {
+      return {
+        body: JSON.stringify({ message: "Not Found" }),
+        status: 404,
+        headers: { "Content-Type": "application/json" },
+      };
+    }
 
     return {
-      body: "",
       status: 204,
     };
   } catch (error) {
     context.log(error);
     return {
-      body: JSON.stringify({
-        message:
-          error instanceof Error ? error.message : "Internal Server Error",
-      }),
+      body: error.message,
       status: 500,
-      headers: { "Content-Type": "application/json" },
     };
   } finally {
     connection.release();

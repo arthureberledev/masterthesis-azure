@@ -10,9 +10,9 @@ import type { ResultSetHeader } from "mysql2/promise";
 
 const pool = mysql
   .createPool({
-    host: "mt-sqlserver.mysql.database.azure.com",
-    user: "masterthesis",
-    database: "flexibleserverdb",
+    host: "mt-db-server.mysql.database.azure.com",
+    user: "mt_user",
+    database: "mt_db",
     password: "secretpassword",
     connectionLimit: 100,
   })
@@ -25,9 +25,9 @@ export async function handler(
   const connection = await pool.getConnection();
   try {
     const id = request.params.id;
-    const body = (await request.json()) as { email: string | undefined };
-    const email = body.email;
-    if (!id || !email) {
+    const body = (await request.json()) as { name: string | undefined };
+    const name = body.name;
+    if (!id || !name) {
       return {
         body: JSON.stringify({ message: "Bad Request" }),
         status: 400,
@@ -36,8 +36,8 @@ export async function handler(
     }
 
     const [results] = (await connection.query(
-      "UPDATE users SET email = ? WHERE id = ?",
-      [email, id]
+      "UPDATE users SET name = ? WHERE id = ?",
+      [name, id]
     )) as ResultSetHeader[];
 
     if (results.affectedRows === 0) {
