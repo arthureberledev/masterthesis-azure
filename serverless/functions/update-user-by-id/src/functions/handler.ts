@@ -6,7 +6,7 @@ import {
 } from "@azure/functions";
 
 import * as mysql from "mysql2";
-import type { ResultSetHeader } from "mysql2/promise";
+import type { ResultSetHeader, PoolConnection } from "mysql2/promise";
 
 const pool = mysql
   .createPool({
@@ -22,7 +22,21 @@ export async function handler(
   request: HttpRequest,
   context: InvocationContext
 ): Promise<HttpResponseInit> {
-  const connection = await pool.getConnection();
+  let connection: PoolConnection | null = null;
+
+  try {
+    connection = await pool.getConnection();
+  } catch (error) {
+    context.log(error);
+    return {
+      body: JSON.stringify({
+        message: error.message || "Failed to connect to database",
+      }),
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    };
+  }
+
   try {
     const id = request.params.id;
     const body = (await request.json()) as { name: string | undefined };
@@ -57,8 +71,7 @@ export async function handler(
     context.log(error);
     return {
       body: JSON.stringify({
-        message:
-          error instanceof Error ? error.message : "Internal Server Error",
+        message: error.message || "Internal Server Error",
       }),
       status: 500,
       headers: { "Content-Type": "application/json" },

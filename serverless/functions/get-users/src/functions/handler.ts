@@ -31,7 +31,10 @@ export async function handler(
     };
   } catch (error) {
     context.log(error);
-    return { body: error.message, status: 500 };
+    return {
+      body: error.message || "Internal Server Error",
+      status: 500,
+    };
   } finally {
     connection.release();
   }

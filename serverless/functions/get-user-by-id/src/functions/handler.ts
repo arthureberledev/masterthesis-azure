@@ -6,9 +6,9 @@ import {
 } from "@azure/functions";
 
 import * as mysql from "mysql2";
-import type { RowDataPacket } from "mysql2/promise";
+import type { PoolConnection, RowDataPacket } from "mysql2/promise";
 
-const db = mysql
+const pool = mysql
   .createPool({
     host: "mt-db-server.mysql.database.azure.com",
     user: "mt_user",
@@ -22,7 +22,21 @@ export async function handler(
   request: HttpRequest,
   context: InvocationContext
 ): Promise<HttpResponseInit> {
-  const connection = await db.getConnection();
+  let connection: PoolConnection | null = null;
+
+  try {
+    connection = await pool.getConnection();
+  } catch (error) {
+    context.log(error);
+    return {
+      body: JSON.stringify({
+        message: error.message || "Failed to connect to database",
+      }),
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    };
+  }
+
   try {
     const id = request.params.id;
     if (!id) {
@@ -33,7 +47,7 @@ export async function handler(
       };
     }
 
-    const [rows] = (await db.query("SELECT * FROM users WHERE id = ?", [
+    const [rows] = (await connection.query("SELECT * FROM users WHERE id = ?", [
       id,
     ])) as RowDataPacket[];
 
@@ -53,12 +67,8 @@ export async function handler(
   } catch (error) {
     context.log(error);
     return {
-      body: JSON.stringify({
-        message:
-          error instanceof Error ? error.message : "Internal Server Error",
-      }),
+      body: error.message || "Internal Server Error",
       status: 500,
-      headers: { "Content-Type": "application/json" },
     };
   } finally {
     connection.release();
